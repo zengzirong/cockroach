@@ -12,12 +12,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
-          
-      - name: Generate and test
-        run: |
-          go build -o /tmp/optgen ./pkg/sql/opt/optgen/cmd/optgen
-          /tmp/optgen -out pkg/sql/opt/norm/factory.og.go factory pkg/sql/opt/ops/*.opt pkg/sql/opt/norm/rules/*.opt
-          cd pkg/sql/opt/norm && go test -v .
+      - name: Test optimizer rules
+        run: ./dev test pkg/sql/opt/norm

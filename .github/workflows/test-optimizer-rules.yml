@@ -12,8 +12,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Build dev tool
-        run: bazel build //pkg/cmd/dev
-        
       - name: Test optimizer rules
-        run: ./dev test pkg/sql/opt/norm
+        run: bazel test //pkg/sql/opt/norm:norm_test --test_output=errors

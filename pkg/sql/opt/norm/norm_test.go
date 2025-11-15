@@ -51,6 +51,30 @@ func TestNormRules(t *testing.T) {
 	})
 }
 
+// TestRuleScript tests RuleScript-related normalization rules.
+// These are custom test cases for the RuleScript project.
+//
+// Rules files can be run separately like this:
+//
+//	./dev test pkg/sql/opt/norm -f TestRuleScript
+//	./dev test pkg/sql/opt/norm -f TestRuleScript/cockroach_tests
+func TestRuleScript(t *testing.T) {
+	defer leaktest.AfterTest(t)()
+	defer log.Scope(t).Close(t)
+
+	const fmtFlags = memo.ExprFmtHideStats | memo.ExprFmtHideCost | memo.ExprFmtHideRuleProps |
+		memo.ExprFmtHideQualifications | memo.ExprFmtHideScalars | memo.ExprFmtHideTypes |
+		memo.ExprFmtHideNotVisibleIndexInfo | memo.ExprFmtHideFastPathChecks
+	datadriven.Walk(t, datapathutils.TestDataPath(t, "rulescript"), func(t *testing.T, path string) {
+		catalog := testcat.New()
+		datadriven.RunTest(t, path, func(t *testing.T, d *datadriven.TestData) string {
+			tester := opttester.New(catalog, d.Input)
+			tester.Flags.ExprFormat = fmtFlags
+			return tester.RunCommand(t, d)
+		})
+	})
+}
+
 // TestRuleProps files can be run separately like this:
 //
 //	./dev test pkg/sql/opt/norm -f TestNormRuleProps/orderings

@@ -1,16 +1,18 @@
-name: Test Optimizer Rules
+name: Test RuleScript Optimizer Rules
 
 on:
   push:
-    paths:
-      - 'pkg/sql/opt/norm/rules/*.opt'
-      - 'pkg/sql/opt/norm/**'
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v4
       
-      - name: Test optimizer rules
-        run: bazel test //pkg/sql/opt/norm:norm_test --test_output=errors
+      - name: Test RuleScript rules
+        run: |
+          bazel test //pkg/sql/opt/norm:norm_test \
+            --test_output=errors \
+            --test_timeout=600 \
+            --test_filter=TestRuleScript

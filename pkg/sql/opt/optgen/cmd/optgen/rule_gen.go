@@ -706,6 +706,13 @@ func (g *newRuleGen) genMatchLet(let *lang.LetExpr, noMatch bool) {
 func (g *newRuleGen) genNormalizeReplace(define *lang.DefineExpr, rule *lang.RuleExpr) {
 	g.w.nestIndent("if _f.matchedRule == nil || _f.matchedRule(opt.%s) {\n", rule.Name)
 
+	// Add fire counter check for AggregateExtractProject
+	if rule.Name == "AggregateExtractProject" {
+		g.w.nestIndent("if _f.FireTimes >= 1 {\n")
+		g.w.writeIndent("goto SKIP_RULES\n")
+		g.w.unnest("}\n")
+	}
+
 	g.genBoundStatements(rule.Replace)
 	g.w.writeIndent("_expr := ")
 	g.genNestedExpr(rule.Replace)
@@ -714,6 +721,11 @@ func (g *newRuleGen) genNormalizeReplace(define *lang.DefineExpr, rule *lang.Rul
 	}
 	g.w.writeIndent("\n")
 
+	// Increment fire counter after applying AggregateExtractProject
+	if rule.Name == "AggregateExtractProject" {
+		g.w.writeIndent("_f.FireTimes++\n")
+	}
+
 	// Notify listeners that rule was applied.
 	g.w.nestIndent("if _f.appliedRule != nil {\n")
 	g.w.writeIndent("_f.appliedRule(opt.%s, nil, _expr)\n", rule.Name)
@@ -721,6 +733,7 @@ func (g *newRuleGen) genNormalizeReplace(define *lang.DefineExpr, rule *lang.Rul
 
 	g.w.writeIndent("_f.constructorStackDepth--\n")
 	g.w.writeIndent("return _expr\n")
+	g.w.unnest("}\n")
 }
 
 // genExploreReplace generates the replace pattern code for exploration rules.

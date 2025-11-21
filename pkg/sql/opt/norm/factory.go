@@ -98,6 +98,8 @@ type Factory struct {
 	// decremented when a constructor function returns.
 	constructorStackDepth int
 
+	FireTimes int
+
 	// disabledRules is a set of rules that are not allowed to run, used when
 	// rules are disabled during testing to prevent rule cycles.
 	disabledRules intsets.Fast

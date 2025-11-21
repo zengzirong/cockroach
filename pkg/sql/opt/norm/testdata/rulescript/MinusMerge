@@ -19,23 +19,17 @@ SELECT * FROM c
 ----
 except
  ├── columns: x:1 y:2
- ├── left columns: x:1 y:2
- ├── right columns: x:11 y:12
+ ├── left columns: a.x:1 a.y:2
+ ├── right columns: column16:16 column17:17
+ ├── key: (1,2)
  ├── scan a
- │    └── columns: x:1 y:2
- └── distinct-on
-      ├── columns: x:11 y:12
-      ├── grouping columns: x:11 y:12
-      ├── union-all
-      │    ├── columns: x:11 y:12
-      │    ├── left columns: x:5 y:6
-      │    ├── right columns: x:9 y:10
-      │    ├── scan b
-      │    │    └── columns: x:5 y:6
-      │    └── scan c
-      │         └── columns: x:9 y:10
-      └── aggregations
-           ├── const-agg [as=x:11]
-           │    └── x:11
-           └── const-agg [as=y:12]
-                └── y:12
+ │    └── columns: a.x:1 a.y:2
+ └── union
+      ├── columns: column16:16 column17:17
+      ├── left columns: b.x:6 b.y:7
+      ├── right columns: c.x:11 c.y:12
+      ├── key: (16,17)
+      ├── scan b
+      │    └── columns: b.x:6 b.y:7
+      └── scan c
+           └── columns: c.x:11 c.y:12

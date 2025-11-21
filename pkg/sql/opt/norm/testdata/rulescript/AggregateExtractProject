@@ -2,7 +2,7 @@ exec-ddl
 CREATE TABLE emp (empno INT PRIMARY KEY, ename STRING, job STRING, mgr INT, hiredate DATE, sal DECIMAL, comm DECIMAL, deptno INT)
 ----
 
-norm expect=AggregateExtractProject disable=(MinusMerge)
+norm expect=AggregateExtractProject disable=(MinusMerge, EliminateProject, PruneScanCols)
 SELECT SUM(sal) FROM emp
 ----
 group-by

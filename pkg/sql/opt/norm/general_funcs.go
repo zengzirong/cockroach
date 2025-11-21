@@ -1673,10 +1673,11 @@ func (c *CustomFuncs) HasAllLeakProofFilters(filters memo.FiltersExpr) bool {
 ###                Added general functions                     ###
 ##################################################################
 */
-func (c *CustomFuncs) MakeUnionPrivateForExcept(inner, outer *memo.SetPrivate) *memo.SetPrivate {
-    return &memo.SetPrivate{
-        LeftCols:  inner.RightCols,
-        RightCols: outer.RightCols,
-        OutCols:   outer.RightCols,
-    }
+func (c *CustomFuncs) ConstructMinusMerge(
+    left, rightB, rightC memo.RelExpr,
+    pInner, pOuter *memo.SetPrivate,
+) memo.RelExpr {
+    unionPrivate, exceptPrivate := c.MakePrivatesForMinusMerge(left, rightB, rightC, pInner, pOuter)
+    union := c.f.ConstructUnion(rightB, rightC, unionPrivate)
+    return c.f.ConstructExcept(left, union, exceptPrivate)
 }

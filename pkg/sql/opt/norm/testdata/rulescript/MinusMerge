@@ -24,39 +24,90 @@ SELECT * FROM (
 ) aa
 ----
 except
- ├── columns: dname:19 deptno:20
- ├── left columns: dname:11 deptno:12
- ├── right columns: dname:2 deptno:1
+ ├── columns: dname:2 deptno:1!null
+ ├── left columns: dname:2 deptno:1!null
+ ├── right columns: column32:32 column33:33
+ ├── key: (1)
+ ├── fd: (1)-->(2)
  ├── project
- │    ├── columns: dname:2 deptno:1
- │    └── group-by (hash)
- │         ├── columns: deptno:1!null dname:2 count_rows:5
- │         ├── grouping columns: deptno:1!null dname:2
- │         └── aggregations
- │              └── count-rows [as=count_rows:5]
- ├── project
- │    ├── columns: dname:7 deptno:6!null
- │    └── scan dept
- │         ├── columns: deptno:6!null dname:7 loc:8
- │         ├── key: (6)
- │         └── fd: (6)-->(7,8)
- ├── except
- │    ├── columns: dname:11 deptno:12
- │    ├── left columns: dname:10 deptno:9
- │    ├── right columns: dname:14 deptno:13
- │    ├── project
- │    │    ├── columns: deptno:9!null dname:10
- │    │    └── scan dept
- │    └── project
- │         ├── columns: dname:14 deptno:13
- │         └── group-by (hash)
- │              ├── columns: deptno:13!null dname:14 count_rows:17
- │              ├── grouping columns: deptno:13!null dname:14
- │              └── aggregations
- │                   └── count-rows [as=count_rows:17]
- └── project
-      ├── columns: dname:19 deptno:18!null
-      └── scan dept
-           ├── columns: deptno:18!null dname:19 loc:20
-           ├── key: (18)
-           └── fd: (18)-->(19,20)
+ │    ├── columns: deptno:1!null dname:2
+ │    ├── key: (1)
+ │    ├── fd: (1)-->(2)
+ │    └── except
+ │         ├── columns: dname:2 deptno:1!null count:7!null
+ │         ├── left columns: dname:2 deptno:1!null count:7!null
+ │         ├── right columns: dname:9 deptno:8 "?column?":13
+ │         ├── key: (1)
+ │         ├── fd: (1)-->(2,7)
+ │         ├── group-by (hash)
+ │         │    ├── columns: deptno:1!null dname:2 count:7!null
+ │         │    ├── grouping columns: deptno:1!null
+ │         │    ├── key: (1)
+ │         │    ├── fd: (1)-->(2,7)
+ │         │    ├── scan dept
+ │         │    │    ├── columns: deptno:1!null dname:2
+ │         │    │    ├── key: (1)
+ │         │    │    └── fd: (1)-->(2)
+ │         │    └── aggregations
+ │         │         ├── count-rows [as=count:7]
+ │         │         └── const-agg [as=dname:2, outer=(2)]
+ │         │              └── dname:2
+ │         └── project
+ │              ├── columns: "?column?":13!null deptno:8!null dname:9
+ │              ├── key: (8)
+ │              ├── fd: ()-->(13), (8)-->(9)
+ │              ├── scan dept
+ │              │    ├── columns: deptno:8!null dname:9
+ │              │    ├── key: (8)
+ │              │    └── fd: (8)-->(9)
+ │              └── projections
+ │                   └── 1 [as="?column?":13]
+ └── distinct-on
+      ├── columns: column32:32 column33:33!null
+      ├── grouping columns: column33:33!null
+      ├── key: (33)
+      ├── fd: (33)-->(32)
+      ├── union-all
+      │    ├── columns: column32:32 column33:33!null
+      │    ├── left columns: dname:15 deptno:14
+      │    ├── right columns: dname:28 deptno:27
+      │    ├── project
+      │    │    ├── columns: deptno:14!null dname:15
+      │    │    ├── key: (14)
+      │    │    ├── fd: (14)-->(15)
+      │    │    └── except
+      │    │         ├── columns: dname:15 deptno:14!null "?column?":19!null
+      │    │         ├── left columns: dname:15 deptno:14!null "?column?":19!null
+      │    │         ├── right columns: dname:21 deptno:20 count:26
+      │    │         ├── key: (14)
+      │    │         ├── fd: ()-->(19), (14)-->(15,19)
+      │    │         ├── project
+      │    │         │    ├── columns: "?column?":19!null deptno:14!null dname:15
+      │    │         │    ├── key: (14)
+      │    │         │    ├── fd: ()-->(19), (14)-->(15)
+      │    │         │    ├── scan dept
+      │    │         │    │    ├── columns: deptno:14!null dname:15
+      │    │         │    │    ├── key: (14)
+      │    │         │    │    └── fd: (14)-->(15)
+      │    │         │    └── projections
+      │    │         │         └── 1 [as="?column?":19]
+      │    │         └── group-by (hash)
+      │    │              ├── columns: deptno:20!null dname:21 count:26!null
+      │    │              ├── grouping columns: deptno:20!null
+      │    │              ├── key: (20)
+      │    │              ├── fd: (20)-->(21,26)
+      │    │              ├── scan dept
+      │    │              │    ├── columns: deptno:20!null dname:21
+      │    │              │    ├── key: (20)
+      │    │              │    └── fd: (20)-->(21)
+      │    │              └── aggregations
+      │    │                   ├── count-rows [as=count:26]
+      │    │                   └── const-agg [as=dname:21, outer=(21)]
+      │    │                        └── dname:21
+      │    └── scan dept
+      │         ├── columns: deptno:27!null dname:28
+      │         ├── key: (27)
+      │         └── fd: (27)-->(28)
+      └── aggregations
+           └── const-agg [as=column32:32, outer=(32)]
+                └── column32:32

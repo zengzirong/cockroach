@@ -1673,34 +1673,40 @@ func (c *CustomFuncs) HasAllLeakProofFilters(filters memo.FiltersExpr) bool {
 ###                Added general functions                     ###
 ##################################################################
 */
-func (c *CustomFuncs) MakeUnionPrivateForMinusMerge(
+// ConstructMinusMerge implements the MinusMerge normalization rule:
+// (A EXCEPT B) EXCEPT C => A EXCEPT (B UNION C)
+func (c *CustomFuncs) ConstructMinusMerge(
     left, rightB, rightC memo.RelExpr,
     pInner, pOuter *memo.SetPrivate,
-) *memo.SetPrivate {
+) memo.RelExpr {
     md := c.mem.Metadata()
+    
+    // Create fresh column IDs for Union's output
+    // The Union will have the same number of columns as the inner Except's right side
     unionOutCols := make(opt.ColList, len(pInner.RightCols))
     for i := range pInner.RightCols {
-        colType := md.ColumnMeta(pInner.RightCols[i]).Type
+        // Get the type from pOuter.RightCols (C's columns) since they should match
+        colType := md.ColumnMeta(pOuter.RightCols[i]).Type
         unionOutCols[i] = md.AddColumn("", colType)
     }
     
-    return &memo.SetPrivate{
-        LeftCols:  pInner.RightCols,
-        RightCols: pOuter.RightCols,
-        OutCols:   unionOutCols,
+    // Create SetPrivate for Union: combines rightB and rightC
+    unionPrivate := &memo.SetPrivate{
+        LeftCols:  pInner.RightCols,  // B's columns
+        RightCols: pOuter.RightCols,   // C's columns
+        OutCols:   unionOutCols,       // Fresh output columns
     }
-}
-
-func (c *CustomFuncs) MakeExceptPrivateForMinusMerge(
-    left, rightB, rightC memo.RelExpr,
-    pInner, pOuter *memo.SetPrivate,
-) *memo.SetPrivate {
-    // Need to call MakeUnionPrivateForMinusMerge to get the union output cols
-    unionPrivate := c.MakeUnionPrivateForMinusMerge(left, rightB, rightC, pInner, pOuter)
     
-    return &memo.SetPrivate{
-        LeftCols:  pInner.LeftCols,
-        RightCols: unionPrivate.OutCols,
-        OutCols:   pOuter.OutCols,
+    // Construct the Union
+    union := c.f.ConstructUnion(rightB, rightC, unionPrivate)
+    
+    // Create SetPrivate for outer Except: combines left (A) and Union
+    exceptPrivate := &memo.SetPrivate{
+        LeftCols:  pInner.LeftCols,    // A's columns
+        RightCols: unionOutCols,        // Union's output columns
+        OutCols:   pOuter.OutCols,      // Final output columns (reuse from pOuter)
     }
+    
+    // Construct and return the final Except
+    return c.f.ConstructExcept(left, union, exceptPrivate)
 }

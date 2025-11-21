@@ -1667,3 +1667,22 @@ func (c *CustomFuncs) HasAllLeakProofFilters(filters memo.FiltersExpr) bool {
 	}
 	return true
 }
+
+/*
+##################################################################
+###                Added general functions                     ###
+##################################################################
+*/
+func (c *CustomFuncs) MakeUnionPrivateForExcept(inner, outer *memo.SetPrivate) *memo.SetPrivate {
+    // The Union combines rightB (from inner) and rightC (from outer)
+    // Union's LeftCols come from inner.RightCols (rightB's columns)
+    // Union's RightCols come from outer.RightCols (rightC's columns)
+    // Union's OutCols should match what outer expects on its right side
+    
+    return &memo.SetPrivate{
+        LeftCols:  inner.RightCols,
+        RightCols: outer.RightCols,
+        OutCols:   outer.RightCols, // Reuse outer's right cols as Union output
+        Ordering:  ordering.Ordering{}, // Empty ordering for canonical form
+    }
+}

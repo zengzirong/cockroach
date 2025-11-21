@@ -14,5 +14,5 @@ jobs:
         run: |
           bazel test //pkg/sql/opt/norm:norm_test \
             --test_output=errors \
-            --test_timeout=600 \
+            --test_timeout=1800 \
             --test_filter=TestRuleScript

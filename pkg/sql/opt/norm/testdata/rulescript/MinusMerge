@@ -8,22 +8,22 @@ SELECT * FROM (
     SELECT dname, deptno FROM
     (
       SELECT dname, deptno, COUNT(1) FROM dept GROUP BY dname, deptno
-      EXCEPT ALL
+      EXCEPT
       SELECT dname, deptno, 1 FROM dept
     ) subq
-    EXCEPT ALL
+    EXCEPT
     SELECT dname, deptno FROM
     (
       SELECT dname, deptno, 1 FROM dept
-      EXCEPT ALL
+      EXCEPT
       SELECT dname, deptno, COUNT(1) FROM dept GROUP BY dname, deptno
     ) subq2
   ) a
-  EXCEPT ALL
+  EXCEPT
   SELECT dname, deptno FROM dept
 ) aa
 ----
-except-all
+except
  ├── columns: dname:19 deptno:20
  ├── left columns: dname:11 deptno:12
  ├── right columns: dname:2 deptno:1
@@ -40,7 +40,7 @@ except-all
  │         ├── columns: deptno:6!null dname:7 loc:8
  │         ├── key: (6)
  │         └── fd: (6)-->(7,8)
- ├── except-all
+ ├── except
  │    ├── columns: dname:11 deptno:12
  │    ├── left columns: dname:10 deptno:9
  │    ├── right columns: dname:14 deptno:13

@@ -2,7 +2,7 @@ exec-ddl
 CREATE TABLE dept (deptno INT PRIMARY KEY, dname STRING, loc STRING)
 ----
 
-norm expect=MinusMerge disable=(SimplifyExcept)
+norm expect=MinusMerge disable=(SimplifyExcept, AggregateExtractProject)
 SELECT * FROM (
   SELECT * FROM (
     SELECT dname, deptno FROM

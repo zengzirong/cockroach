@@ -1,0 +1,62 @@
+exec-ddl
+CREATE TABLE dept (deptno INT PRIMARY KEY, dname STRING, loc STRING)
+----
+
+norm expect=MinusMerge
+SELECT * FROM (
+  SELECT * FROM (
+    SELECT dname, deptno FROM
+    (
+      SELECT dname, deptno, COUNT(1) FROM dept GROUP BY dname, deptno
+      EXCEPT ALL
+      SELECT dname, deptno, 1 FROM dept
+    ) subq
+    EXCEPT ALL
+    SELECT dname, deptno FROM
+    (
+      SELECT dname, deptno, 1 FROM dept
+      EXCEPT ALL
+      SELECT dname, deptno, COUNT(1) FROM dept GROUP BY dname, deptno
+    ) subq2
+  ) a
+  EXCEPT ALL
+  SELECT dname, deptno FROM dept
+) aa
+----
+except-all
+ ├── columns: dname:19 deptno:20
+ ├── left columns: dname:11 deptno:12
+ ├── right columns: dname:2 deptno:1
+ ├── project
+ │    ├── columns: dname:2 deptno:1
+ │    └── group-by (hash)
+ │         ├── columns: deptno:1!null dname:2 count_rows:5
+ │         ├── grouping columns: deptno:1!null dname:2
+ │         └── aggregations
+ │              └── count-rows [as=count_rows:5]
+ ├── project
+ │    ├── columns: dname:7 deptno:6!null
+ │    └── scan dept
+ │         ├── columns: deptno:6!null dname:7 loc:8
+ │         ├── key: (6)
+ │         └── fd: (6)-->(7,8)
+ ├── except-all
+ │    ├── columns: dname:11 deptno:12
+ │    ├── left columns: dname:10 deptno:9
+ │    ├── right columns: dname:14 deptno:13
+ │    ├── project
+ │    │    ├── columns: deptno:9!null dname:10
+ │    │    └── scan dept
+ │    └── project
+ │         ├── columns: dname:14 deptno:13
+ │         └── group-by (hash)
+ │              ├── columns: deptno:13!null dname:14 count_rows:17
+ │              ├── grouping columns: deptno:13!null dname:14
+ │              └── aggregations
+ │                   └── count-rows [as=count_rows:17]
+ └── project
+      ├── columns: dname:19 deptno:18!null
+      └── scan dept
+           ├── columns: deptno:18!null dname:19 loc:20
+           ├── key: (18)
+           └── fd: (18)-->(19,20)

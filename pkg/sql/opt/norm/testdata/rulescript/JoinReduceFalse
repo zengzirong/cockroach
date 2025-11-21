@@ -6,7 +6,7 @@ exec-ddl
 CREATE TABLE t.b (x INT PRIMARY KEY, y INT)
 ----
 
-norm expect=JoinReduceFalse disable=(AggregateExtractProject, AggregateJoinJoinRemove, MinusMerge, FilterMerge)
+norm expect=JoinReduceFalse disable=(AggregateExtractProject, MinusMerge, FilterMerge)
 SELECT * FROM a INNER JOIN b ON a.k = b.x AND a.i > 10 AND False
 ----
 inner-join (cross)

@@ -1,3 +1,11 @@
+exec-ddl
+CREATE TABLE a (k INT PRIMARY KEY, i INT, f FLOAT, s STRING, j JSON)
+----
+
+exec-ddl
+CREATE TABLE t.b (x INT PRIMARY KEY, y INT)
+----
+
 norm expect=JoinReduceFalse disable=(AggregateExtractProject, AggregateJoinJoinRemove, MinusMerge, FilterMerge)
 SELECT * FROM a INNER JOIN b ON a.k = b.x AND a.i > 10 AND False
 ----

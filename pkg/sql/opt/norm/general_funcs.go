@@ -1673,11 +1673,34 @@ func (c *CustomFuncs) HasAllLeakProofFilters(filters memo.FiltersExpr) bool {
 ###                Added general functions                     ###
 ##################################################################
 */
-func (c *CustomFuncs) ConstructMinusMerge(
+func (c *CustomFuncs) MakeUnionPrivateForMinusMerge(
     left, rightB, rightC memo.RelExpr,
     pInner, pOuter *memo.SetPrivate,
-) memo.RelExpr {
-    unionPrivate, exceptPrivate := c.MakePrivatesForMinusMerge(left, rightB, rightC, pInner, pOuter)
-    union := c.f.ConstructUnion(rightB, rightC, unionPrivate)
-    return c.f.ConstructExcept(left, union, exceptPrivate)
+) *memo.SetPrivate {
+    md := c.mem.Metadata()
+    unionOutCols := make(opt.ColList, len(pInner.RightCols))
+    for i := range pInner.RightCols {
+        colType := md.ColumnMeta(pInner.RightCols[i]).Type
+        unionOutCols[i] = md.AddColumn("", colType)
+    }
+    
+    return &memo.SetPrivate{
+        LeftCols:  pInner.RightCols,
+        RightCols: pOuter.RightCols,
+        OutCols:   unionOutCols,
+    }
+}
+
+func (c *CustomFuncs) MakeExceptPrivateForMinusMerge(
+    left, rightB, rightC memo.RelExpr,
+    pInner, pOuter *memo.SetPrivate,
+) *memo.SetPrivate {
+    // Need to call MakeUnionPrivateForMinusMerge to get the union output cols
+    unionPrivate := c.MakeUnionPrivateForMinusMerge(left, rightB, rightC, pInner, pOuter)
+    
+    return &memo.SetPrivate{
+        LeftCols:  pInner.LeftCols,
+        RightCols: unionPrivate.OutCols,
+        OutCols:   pOuter.OutCols,
+    }
 }

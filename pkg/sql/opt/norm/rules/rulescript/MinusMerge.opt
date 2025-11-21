@@ -9,4 +9,12 @@
     $pOuter_4:*
 )
 =>
-(ConstructMinusMerge $left_0 $rightB_1 $rightC_3 $pInner_2 $pOuter_4)
+(Except
+    $left_0
+    (Union
+        $rightB_1
+        $rightC_3
+        (MakeUnionPrivateForMinusMerge $left_0 $rightB_1 $rightC_3 $pInner_2 $pOuter_4)
+    )
+    (MakeExceptPrivateForMinusMerge $left_0 $rightB_1 $rightC_3 $pInner_2 $pOuter_4)
+)

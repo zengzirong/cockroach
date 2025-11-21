@@ -6,7 +6,7 @@
 )
 =>
 (GroupBy
-    $input_5:*
-    $aggregations_6:*
-    $groupingPrivate_7:*
+    $input_5
+    $aggregations_6
+    $groupingPrivate_7
 )

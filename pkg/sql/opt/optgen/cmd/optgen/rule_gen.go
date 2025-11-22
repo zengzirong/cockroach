@@ -707,7 +707,8 @@ func (g *newRuleGen) genNormalizeReplace(define *lang.DefineExpr, rule *lang.Rul
 	g.w.nestIndent("if _f.matchedRule == nil || _f.matchedRule(opt.%s) {\n", rule.Name)
 
 	// Add fire counter check for AggregateExtractProject
-	if ((rule.Name == "AggregateExtractProject") || (rule.Name == "JoinReduceFalse")) {
+	if ((rule.Name == "AggregateExtractProject")) {
+	// || (rule.Name == "JoinReduceFalse")
 		g.w.nestIndent("if _f.FireTimes >= 1 {\n")
 		g.w.writeIndent("goto SKIP_RULES\n")
 		g.w.unnest("}\n")
@@ -722,7 +723,8 @@ func (g *newRuleGen) genNormalizeReplace(define *lang.DefineExpr, rule *lang.Rul
 	g.w.writeIndent("\n")
 
 	// Increment fire counter after applying AggregateExtractProject
-	if ((rule.Name == "AggregateExtractProject") || (rule.Name == "JoinReduceFalse")) {
+	if ((rule.Name == "AggregateExtractProject")) {
+	// || (rule.Name == "JoinReduceFalse")
 		g.w.writeIndent("_f.FireTimes++\n")
 	}
 

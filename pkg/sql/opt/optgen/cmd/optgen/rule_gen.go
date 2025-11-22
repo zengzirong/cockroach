@@ -706,14 +706,6 @@ func (g *newRuleGen) genMatchLet(let *lang.LetExpr, noMatch bool) {
 func (g *newRuleGen) genNormalizeReplace(define *lang.DefineExpr, rule *lang.RuleExpr) {
 	g.w.nestIndent("if _f.matchedRule == nil || _f.matchedRule(opt.%s) {\n", rule.Name)
 
-	// Add fire counter check for AggregateExtractProject
-	if ((rule.Name == "AggregateExtractProject") || 
-	(rule.Name == "MinusMerge")) {
-		g.w.nestIndent("if _f.FireTimes >= 1 {\n")
-		g.w.writeIndent("goto SKIP_RULES\n")
-		g.w.unnest("}\n")
-	}
-
 	g.genBoundStatements(rule.Replace)
 	g.w.writeIndent("_expr := ")
 	g.genNestedExpr(rule.Replace)
@@ -721,12 +713,6 @@ func (g *newRuleGen) genNormalizeReplace(define *lang.DefineExpr, rule *lang.Rul
 		g.genTypeConversion(define)
 	}
 	g.w.writeIndent("\n")
-
-	// Increment fire counter after applying AggregateExtractProject
-	if ((rule.Name == "AggregateExtractProject") || 
-	(rule.Name == "MinusMerge")) {
-		g.w.writeIndent("_f.FireTimes++\n")
-	}
 
 	// Notify listeners that rule was applied.
 	g.w.nestIndent("if _f.appliedRule != nil {\n")

@@ -2,10 +2,10 @@
 (InnerJoin
     $input_0:*
     $input_1:*
-    $on_2:[
-        ...
-        $item_3:(FiltersItem (False))
-        ...
+    [ 
+        $item_3:(FiltersItem 
+            (And [ ... (False) ... ])
+        )
     ]
     $private_4:*
 )

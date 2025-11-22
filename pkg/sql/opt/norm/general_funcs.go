@@ -1710,3 +1710,14 @@ func (c *CustomFuncs) ConstructMinusMerge(
     // Construct and return the final Except
     return c.f.ConstructExcept(left, union, exceptPrivate)
 }
+
+func (c *CustomFuncs) ContainsFalse(e opt.ScalarExpr) bool {
+    switch t := e.(type) {
+    case *memo.FalseExpr:
+        return true
+    case *memo.AndExpr:
+        return c.ContainsFalse(t.Left) || c.ContainsFalse(t.Right)
+    default:
+        return false
+    }
+}

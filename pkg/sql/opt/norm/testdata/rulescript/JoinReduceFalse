@@ -1,0 +1,13 @@
+exec-ddl
+CREATE TABLE a (k INT PRIMARY KEY, i INT, f FLOAT, s STRING, j JSON)
+----
+
+norm expect=JoinReduceFalse disable=(AggregateExtractProject, MinusMerge, FilterMerge, SimplifyZeroCardinalityGroup, SimplifyAndFalse, SimplifyFalseAnd,PushFilterIntoJoinLeftAndRight, EliminateProject, PruneValuesCols, DetectJoinContradiction, PushFilterIntoJoinLeft, HoistJoinProjectLeft, MergeProjects, PruneSelectCols, PruneJoinLeftCols, PruneJoinRightCols)
+SELECT false AND s='foo' AS r FROM a
+----
+project
+ ├── columns: r:8!null
+ ├── fd: ()-->(8)
+ ├── scan a
+ └── projections
+      └── false [as=r:8]

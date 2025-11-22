@@ -1,18 +1,5 @@
+# JoinReduceFalse maps the And operator to False if its left input is False.
 [JoinReduceFalse, Normalize]
-(InnerJoin
-    $input_0:*
-    $input_1:*
-    $on_2:[
-        ...
-        $item_3:(FiltersItem (False))
-        ...
-    ]
-    $private_4:*
-)
+(And $left:(False) *)
 =>
-(InnerJoin
-    $input_0
-    $input_1
-    [ (FiltersItem (False)) ]
-    $private_4
-)
+$left

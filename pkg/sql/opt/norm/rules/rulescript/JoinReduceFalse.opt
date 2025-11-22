@@ -3,9 +3,9 @@
     $input_0:*
     $input_1:*
     [ 
-        $item_3:(FiltersItem $condition:*) &
-            ^(False) &
-            (ContainsFalse $condition)
+        $item_3:(FiltersItem 
+            $condition:* & ^(False) & (ContainsFalse $condition)
+        )
     ]
     $private_4:*
 )

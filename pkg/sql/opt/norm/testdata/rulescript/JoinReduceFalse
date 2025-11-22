@@ -6,7 +6,7 @@ exec-ddl
 CREATE TABLE t.b (x INT PRIMARY KEY, y INT)
 ----
 
-norm expect=JoinReduceFalse disable=(AggregateExtractProject, MinusMerge, FilterMerge, SimplifyZeroCardinalityGroup, SimplifyAndFalse, SimplifyFalseAnd, PushFilterIntoJoinLeftAndRight, EliminateProject, PruneValuesCols, DetectJoinContradiction, PushFilterIntoJoinLeft, HoistJoinProjectLeft, MergeProjects, PruneSelectCols, PruneJoinLeftCols, PruneJoinRightCols)
+norm expect=JoinReduceFalse disable=(AggregateExtractProject, MinusMerge, FilterMerge, SimplifyZeroCardinalityGroup, SimplifyAndFalse, SimplifyFalseAnd, PushFilterIntoJoinLeftAndRight, EliminateProject, PruneValuesCols, DetectJoinContradiction, PushFilterIntoJoinLeft, HoistJoinProjectLeft, MergeProjects, PruneSelectCols, PruneJoinLeftCols, PruneJoinRightCols, PushFilterIntoJoinRight)
 SELECT * FROM a INNER JOIN b ON a.k = b.x AND a.i > 10 AND False AND b.y > 10
 ----
 inner-join (cross)

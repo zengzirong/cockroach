@@ -4,6 +4,7 @@
     $input_1:*
     [ 
         $item_3:(FiltersItem $condition:*) &
+            ^(False) &
             (ContainsFalse $condition)
     ]
     $private_4:*

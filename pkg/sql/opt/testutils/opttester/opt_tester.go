@@ -868,6 +868,8 @@ func formatRuleSet(r RuleSet) string {
 }
 
 func (ot *OptTester) checkExpectedRules(tb testing.TB, d *datadriven.TestData) {
+	fmt.Printf("Applied rules: %s\n", formatRuleSet(ot.appliedRules))
+	
 	if !ot.Flags.ExpectedRules.SubsetOf(ot.appliedRules) {
 		unseen := ot.Flags.ExpectedRules.Difference(ot.appliedRules)
 		d.Fatalf(tb, "expected to see %s, but was not triggered. Did see %s",

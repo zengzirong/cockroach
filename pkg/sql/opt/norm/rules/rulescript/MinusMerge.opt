@@ -9,4 +9,12 @@
     $pOuter_4:*
 )
 =>
-(ConstructMinusMerge $left_0 $rightB_1 $rightC_3 $pInner_2 $pOuter_4)
+(Except
+    (Except
+        $left_0
+        $rightB_1
+        $pInner_2
+    )
+    $rightC_3
+    $pOuter_4
+)

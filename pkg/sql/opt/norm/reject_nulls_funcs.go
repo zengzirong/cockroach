@@ -231,51 +231,51 @@ func DeriveRejectNullCols(mem *memo.Memo, in memo.RelExpr, disabledRules intsets
 //  2. The aggregate function returns null if its input is empty. And since
 //     by #1, the presence of nulls does not alter the result, the aggregate
 //     function would return null if its input contains only null values.
-func deriveGroupByRejectNullCols(
-	mem *memo.Memo, in memo.RelExpr, disabledRules intsets.Fast,
-) opt.ColSet {
-	input := in.Child(0).(memo.RelExpr)
-	aggs := *in.Child(1).(*memo.AggregationsExpr)
+// func deriveGroupByRejectNullCols(
+// 	mem *memo.Memo, in memo.RelExpr, disabledRules intsets.Fast,
+// ) opt.ColSet {
+// 	input := in.Child(0).(memo.RelExpr)
+// 	aggs := *in.Child(1).(*memo.AggregationsExpr)
 
-	var rejectNullCols opt.ColSet
-	var savedInColID opt.ColumnID
-	for i := range aggs {
-		agg := memo.ExtractAggFunc(aggs[i].Agg)
-		aggOp := agg.Op()
+// 	var rejectNullCols opt.ColSet
+// 	var savedInColID opt.ColumnID
+// 	for i := range aggs {
+// 		agg := memo.ExtractAggFunc(aggs[i].Agg)
+// 		aggOp := agg.Op()
 
-		if aggOp == opt.ConstAggOp {
-			continue
-		}
+// 		if aggOp == opt.ConstAggOp {
+// 			continue
+// 		}
 
-		// Criteria #1 and #2.
-		if !opt.AggregateIgnoresNulls(aggOp) || !opt.AggregateIsNullOnEmpty(aggOp) {
-			// Can't reject nulls for the aggregate.
-			return opt.ColSet{}
-		}
+// 		// Criteria #1 and #2.
+// 		if !opt.AggregateIgnoresNulls(aggOp) || !opt.AggregateIsNullOnEmpty(aggOp) {
+// 			// Can't reject nulls for the aggregate.
+// 			return opt.ColSet{}
+// 		}
 
-		// Get column ID of aggregate's Variable operator input.
-		inColID := agg.Child(0).(*memo.VariableExpr).Col
+// 		// Get column ID of aggregate's Variable operator input.
+// 		inColID := agg.Child(0).(*memo.VariableExpr).Col
 
-		// Criteria #3.
-		if savedInColID != 0 && savedInColID != inColID {
-			// Multiple columns used by aggregate functions, so can't reject nulls
-			// for any of them.
-			return opt.ColSet{}
-		}
-		savedInColID = inColID
+// 		// Criteria #3.
+// 		if savedInColID != 0 && savedInColID != inColID {
+// 			// Multiple columns used by aggregate functions, so can't reject nulls
+// 			// for any of them.
+// 			return opt.ColSet{}
+// 		}
+// 		savedInColID = inColID
 
-		if !DeriveRejectNullCols(mem, input, disabledRules).Contains(inColID) {
-			// Input has not requested null rejection on the input column.
-			return opt.ColSet{}
-		}
+// 		if !DeriveRejectNullCols(mem, input, disabledRules).Contains(inColID) {
+// 			// Input has not requested null rejection on the input column.
+// 			return opt.ColSet{}
+// 		}
 
-		// Can possibly reject column, but keep searching, since if
-		// multiple columns are used by aggregate functions, then nulls
-		// can't be rejected on any column.
-		rejectNullCols.Add(aggs[i].Col)
-	}
-	return rejectNullCols
-}
+// 		// Can possibly reject column, but keep searching, since if
+// 		// multiple columns are used by aggregate functions, then nulls
+// 		// can't be rejected on any column.
+// 		rejectNullCols.Add(aggs[i].Col)
+// 	}
+// 	return rejectNullCols
+// }
 
 // GetNullRejectedCols returns the set of columns which are null-rejected by the
 // given FiltersExpr.

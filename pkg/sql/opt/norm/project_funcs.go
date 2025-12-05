@@ -970,22 +970,22 @@ func (c *CustomFuncs) CanHoistNonRemappingProjections(
 	return remap, other, canHoist
 }
 
-// UnbindFiltersFromProjections remaps column references in the given filters
-// to refer to input columns instead of projected output columns, based on the
-// given projections. It assumes that AllAreRemappingProjections returns true
-// for the given projections.
-func (c *CustomFuncs) UnbindFiltersFromProjections(
-	projections memo.ProjectionsExpr, filters memo.FiltersExpr,
-) memo.FiltersExpr {
-	var colMap opt.ColMap
-	for i := range projections {
-		from := projections[i].Col
-		to := projections[i].Element.(*memo.VariableExpr).Col
-		colMap.Set(int(from), int(to))
-	}
-	newFilters := c.f.RemapCols(&filters, colMap).(*memo.FiltersExpr)
-	return *newFilters
-}
+// // UnbindFiltersFromProjections remaps column references in the given filters
+// // to refer to input columns instead of projected output columns, based on the
+// // given projections. It assumes that AllAreRemappingProjections returns true
+// // for the given projections.
+// func (c *CustomFuncs) UnbindFiltersFromProjections(
+// 	projections memo.ProjectionsExpr, filters memo.FiltersExpr,
+// ) memo.FiltersExpr {
+// 	var colMap opt.ColMap
+// 	for i := range projections {
+// 		from := projections[i].Col
+// 		to := projections[i].Element.(*memo.VariableExpr).Col
+// 		colMap.Set(int(from), int(to))
+// 	}
+// 	newFilters := c.f.RemapCols(&filters, colMap).(*memo.FiltersExpr)
+// 	return *newFilters
+// }
 
 // HasAllLeakProofProjections returns true if every projection given uses
 // leakproof expressions.

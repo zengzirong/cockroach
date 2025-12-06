@@ -169,7 +169,7 @@ values
 # --------------------------------------------------
 # JoinReduceTrue
 # --------------------------------------------------
-norm expect=JoinReduceTrue disable=(JoinAddRedundantSemiJoin,ProjectFilterTranspose,SimplifyJoinFilters,SimplifyAndTrue,SimplifyTrueAnd,SimplifySelectFilters,JoinConditionPush,FilterProjectTranspose,MergeSelectInnerJoin,PushSelectIntoJoinLeft,PushSelectCondLeftIntoJoinLeftAndRight,JoinExtractFilter,PushFilterIntoJoinLeftAndRight,FilterIntoJoin)
+norm expect=JoinReduceTrue disable=(JoinAddRedundantSemiJoin,ProjectFilterTranspose,SimplifyJoinFilters,SimplifyAndTrue,SimplifyTrueAnd,SimplifySelectFilters,JoinConditionPush,FilterProjectTranspose,MergeSelectInnerJoin,PushSelectIntoJoinLeft,PushSelectCondLeftIntoJoinLeftAndRight,JoinExtractFilter,PushFilterIntoJoinLeftAndRight,FilterIntoJoin,PushFilterIntoJoinLeft)
 SELECT *
 FROM emp
 INNER JOIN (

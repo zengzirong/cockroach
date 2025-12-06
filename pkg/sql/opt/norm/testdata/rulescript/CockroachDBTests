@@ -169,7 +169,7 @@ values
 # --------------------------------------------------
 # JoinReduceTrue
 # --------------------------------------------------
-norm expect=JoinReduceTrue disable=(JoinAddRedundantSemiJoin,ProjectFilterTranspose,SimplifyJoinFilters,SimplifyAndTrue,SimplifyTrueAnd,SimplifySelectFilters,JoinConditionPush,FilterProjectTranspose,MergeSelectInnerJoin,PushSelectIntoJoinLeft,PushSelectCondLeftIntoJoinLeftAndRight,JoinExtractFilter,PushFilterIntoJoinLeftAndRight,EliminateProject,FilterIntoJoin,FilterMerge,DeduplicateSelectFilters,PushFilterIntoJoinLeft,HoistJoinProjectRight,HoistJoinProjectLeft,MergeProjects,FilterReduceTrue,JoinPushTransitivePredicates,PushFilterIntoJoinRight,ProjectMerge,EliminateSelect,MergeSelects,PushSelectIntoProject,PushSelectIntoInlinableProject,InlineProjectInProject)
+norm expect=JoinReduceTrue disable=(JoinAddRedundantSemiJoin,ProjectFilterTranspose,SimplifyJoinFilters,SimplifyAndTrue,SimplifyTrueAnd,SimplifySelectFilters,JoinConditionPush,FilterProjectTranspose,MergeSelectInnerJoin,PushSelectIntoJoinLeft,PushSelectCondLeftIntoJoinLeftAndRight,JoinExtractFilter,PushFilterIntoJoinLeftAndRight,FilterIntoJoin,FilterMerge,DeduplicateSelectFilters,PushFilterIntoJoinLeft,HoistJoinProjectRight,HoistJoinProjectLeft,MergeProjects,FilterReduceTrue,JoinPushTransitivePredicates,PushFilterIntoJoinRight,ProjectMerge,EliminateSelect,MergeSelects,PushSelectIntoProject,PushSelectIntoInlinableProject,InlineProjectInProject)
 SELECT *
 FROM emp
 INNER JOIN (
@@ -211,7 +211,7 @@ project
       │         └── filters (true)
       └── filters
            └── emp.deptno:8 = dept.deptno:11 [outer=(8,11), constraints=(/8: (/NULL - ]; /11: (/NULL - ]), fd=(8)==(11), (11)==(8)]
-           
+
 # --------------------------------------------------
 # FilterAggregateTranspose
 # --------------------------------------------------

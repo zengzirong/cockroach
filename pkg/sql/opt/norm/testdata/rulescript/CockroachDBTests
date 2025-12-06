@@ -135,7 +135,7 @@ values
 # --------------------------------------------------
 # ProjectMerge
 # --------------------------------------------------
-norm expect=ProjectMerge disable=(ProjectFilterTranspose,EliminateProject,PruneScanCols,JoinConditionPush,FilterProjectTranspose,JoinExtractFilter)
+norm expect=ProjectMerge disable=(MergeProjects,ProjectFilterTranspose,EliminateProject,PruneScanCols,JoinConditionPush,FilterProjectTranspose,JoinExtractFilter)
 SELECT id, name
 FROM (
     SELECT empno AS id, ename AS name, empno + 1 AS next_id

@@ -679,7 +679,7 @@ distinct-on
  ├── columns: empno:1!null deptno:16
  ├── grouping columns: empno:1!null d.deptno:16
  ├── key: (1)
- ├── fd: (1)-->(8,16)
+ ├── fd: (1)-->(16)
  └── left-join (hash)
       ├── columns: empno:1!null e.deptno:8 d.deptno:16
       ├── multiplicity: left-rows(exactly-one), right-rows(zero-or-more)

@@ -668,7 +668,7 @@ distinct-on
 # --------------------------------------------------
 # AggregateJoinJoinRemove
 # --------------------------------------------------
-norm expect=AggregateJoinJoinRemove disable=(ProjectFilterTranspose,EliminateJoinUnderGroupByLeft,EliminateJoinUnderGroupByRight,PruneScanCols,JoinConditionPush,FilterProjectTranspose,EliminateDistinct,EliminateGroupBy,EliminateProject,JoinExtractFilter,ReduceGroupingCols)
+norm expect=AggregateJoinJoinRemove disable=(ProjectFilterTranspose,EliminateJoinUnderGroupByLeft,EliminateJoinUnderGroupByRight,PruneScanCols,JoinConditionPush,FilterProjectTranspose,EliminateDistinct,EliminateGroupBy,EliminateProject,JoinExtractFilter)
 SELECT e.empno, d.deptno
 FROM emp e
 LEFT JOIN dept d2 ON e.deptno = d2.deptno

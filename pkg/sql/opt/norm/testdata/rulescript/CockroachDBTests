@@ -444,7 +444,7 @@ project
 # --------------------------------------------------
 # JoinReduceFalse
 # --------------------------------------------------
-norm expect=JoinReduceFalse disable=(JoinAddRedundantSemiJoin,ProjectFilterTranspose,SimplifyJoinFilters,SimplifyAndFalse,JoinConditionPush,FilterProjectTranspose,JoinExtractFilter)
+norm expect=JoinReduceFalse disable=(JoinAddRedundantSemiJoin,ProjectFilterTranspose,SimplifyJoinFilters,SimplifyAndFalse,JoinConditionPush,FilterProjectTranspose,JoinExtractFilter,PushFilterIntoJoinLeftAndRight)
 SELECT * FROM emp INNER JOIN dept ON emp.deptno = dept.deptno AND FALSE
 ----
 values

@@ -716,7 +716,7 @@ distinct-on
 # --------------------------------------------------
 # AggregateProjectConstantToDummyJoin
 # --------------------------------------------------
-norm expect=AggregateProjectConstantToDummyJoin disable=(JoinAddRedundantSemiJoin,MergeSelectInnerJoin,ProjectInnerJoinValues,InlineJoinConstantsLeft,InlineJoinConstantsRight,ProjectMerge,EliminateJoinNoColsRight,EliminateJoinNoColsLeft,PruneJoinRightCols,PruneJoinLeftCols,HoistJoinProjectLeft,HoistJoinProjectRight,JoinExtractFilter)
+norm expect=AggregateProjectConstantToDummyJoin disable=(JoinAddRedundantSemiJoin,MergeSelectInnerJoin,ProjectInnerJoinValues,InlineJoinConstantsLeft,InlineJoinConstantsRight,ProjectMerge,EliminateJoinNoColsRight,EliminateJoinNoColsLeft,PruneJoinRightCols,PruneJoinLeftCols,HoistJoinProjectLeft,HoistJoinProjectRight,JoinExtractFilter,ReduceGroupingCols,AggregateProjectMerge)
 SELECT count(*)
 FROM (SELECT empno, 1 AS k FROM emp)
 GROUP BY k

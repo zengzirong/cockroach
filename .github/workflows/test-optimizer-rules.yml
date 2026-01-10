@@ -2,6 +2,9 @@ name: Test RuleScript Optimizer Rules
 
 on:
   push:
+    paths:
+      - 'pkg/sql/opt/norm/rules/rulescript/**'
+  workflow_dispatch:
 
 jobs:
   test:

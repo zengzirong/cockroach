@@ -1,0 +1,70 @@
+name: Benchmark RuleScript Performance
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build baseline (disable RuleScript rules)
+        run: |
+          # 临时移走 RuleScript 规则
+          mv pkg/sql/opt/norm/rules/rulescript pkg/sql/opt/norm/rules/rulescript.backup
+          
+          # 编译（factory.og.go 不会包含这些规则）
+          bazel build //pkg/cmd/cockroach
+          cp bazel-bin/pkg/cmd/cockroach/cockroach_/cockroach ./cockroach_baseline
+          
+          # 恢复规则文件
+          mv pkg/sql/opt/norm/rules/rulescript.backup pkg/sql/opt/norm/rules/rulescript
+      
+      - name: Build optimized (with RuleScript rules)
+        run: |
+          # 正常编译（包含 RuleScript 规则）
+          bazel build //pkg/cmd/cockroach
+          cp bazel-bin/pkg/cmd/cockroach/cockroach_/cockroach ./cockroach_optimized
+      
+      - name: Run baseline benchmark
+        run: |
+          ./cockroach_baseline start-single-node --insecure --store=type=mem,size=4GB --background
+          sleep 5
+          ./cockroach_baseline sql --insecure -e "CREATE DATABASE bench;"
+          ./cockroach_baseline sql --insecure -d bench < benchmark/clickbench/schema.sql
+          
+          # 测量 planning time
+          echo "query,planning_ms" > baseline.csv
+          cat benchmark/clickbench/queries.sql | head -10 | while read query; do
+            time=$(./cockroach_baseline sql --insecure -d bench -e "EXPLAIN ANALYZE $query" 2>&1 | grep -oP 'planning time: \K[\d.]+')
+            echo "$query,$time" >> baseline.csv
+          done
+          
+          ./cockroach_baseline quit --insecure
+      
+      - name: Run optimized benchmark
+        run: |
+          ./cockroach_optimized start-single-node --insecure --store=type=mem,size=4GB --background
+          sleep 5
+          ./cockroach_optimized sql --insecure -e "CREATE DATABASE bench;"
+          ./cockroach_optimized sql --insecure -d bench < benchmark/clickbench/schema.sql
+          
+          echo "query,planning_ms" > optimized.csv
+          cat benchmark/clickbench/queries.sql | head -10 | while read query; do
+            time=$(./cockroach_optimized sql --insecure -d bench -e "EXPLAIN ANALYZE $query" 2>&1 | grep -oP 'planning time: \K[\d.]+')
+            echo "$query,$time" >> optimized.csv
+          done
+          
+          ./cockroach_optimized quit --insecure
+      
+      - name: Compare
+        run: |
+          paste baseline.csv optimized.csv | awk -F',' '{
+            if (NR>1) {
+              improvement = ($2 - $4) / $2 * 100
+              printf "Query: %s | Baseline: %.2fms | Optimized: %.2fms | %+.1f%%\n", NR-1, $2, $4, improvement
+            }
+          }'

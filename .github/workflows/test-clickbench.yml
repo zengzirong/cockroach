@@ -1,0 +1,91 @@
+name: Testing RuleScript Performance with ClickBench
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build baseline (without RuleScript)
+        run: |
+          cp pkg/sql/opt/norm/general_funcs_original.go pkg/sql/opt/norm/general_funcs.go
+          
+          mv pkg/sql/opt/norm/rules/rulescript pkg/sql/opt/norm/rules/rulescript.backup
+          
+          bazel build //pkg/cmd/cockroach
+          cp bazel-bin/pkg/cmd/cockroach/cockroach_/cockroach ./cockroach_baseline
+          
+          git checkout pkg/sql/opt/norm/general_funcs.go
+          mv pkg/sql/opt/norm/rules/rulescript.backup pkg/sql/opt/norm/rules/rulescript
+      
+      - name: Build optimized (with RuleScript)
+        run: |
+          bazel clean
+          bazel build //pkg/cmd/cockroach
+          cp bazel-bin/pkg/cmd/cockroach/cockroach_/cockroach ./cockroach_optimized
+      
+      - name: Run baseline benchmark
+        run: |
+          ./cockroach_baseline start-single-node --insecure --store=type=mem,size=1GB --background
+          sleep 5
+          ./cockroach_baseline sql --insecure -e "CREATE DATABASE bench;"
+          ./cockroach_baseline sql --insecure -d bench < benchmark/clickbench/schema.sql
+          
+          echo "query,planning_ms" > baseline.csv
+          while read query; do
+            if [[ ! -z "$query" ]]; then
+              time=$(./cockroach_baseline sql --insecure -d bench -e "EXPLAIN ANALYZE $query" 2>&1 | grep -oP 'planning time: \K[\d.]+' || echo "0")
+              echo "$query,$time" >> baseline.csv
+            fi
+          done < <(head -10 benchmark/clickbench/queries.sql)
+          
+          ./cockroach_baseline quit --insecure || true
+      
+      - name: Run optimized benchmark
+        run: |
+          ./cockroach_optimized start-single-node --insecure --store=type=mem,size=1GB --background
+          sleep 5
+          ./cockroach_optimized sql --insecure -e "CREATE DATABASE bench;"
+          ./cockroach_optimized sql --insecure -d bench < benchmark/clickbench/schema.sql
+          
+          echo "query,planning_ms" > optimized.csv
+          while read query; do
+            if [[ ! -z "$query" ]]; then
+              time=$(./cockroach_optimized sql --insecure -d bench -e "EXPLAIN ANALYZE $query" 2>&1 | grep -oP 'planning time: \K[\d.]+' || echo "0")
+              echo "$query,$time" >> optimized.csv
+            fi
+          done < <(head -10 benchmark/clickbench/queries.sql)
+          
+          ./cockroach_optimized quit --insecure || true
+      
+      - name: Compare results
+        run: |
+          echo "=== Benchmark Results ==="
+          paste baseline.csv optimized.csv | awk -F',' '
+          BEGIN { total_improvement = 0; count = 0 }
+          NR > 1 {
+            if ($2 > 0 && $4 > 0) {
+              improvement = ($2 - $4) / $2 * 100
+              total_improvement += improvement
+              count++
+              printf "Query %2d: Baseline: %6.2fms | Optimized: %6.2fms | %+6.1f%%\n", NR-1, $2, $4, improvement
+            }
+          }
+          END {
+            if (count > 0) {
+              printf "\nAverage improvement: %+.1f%%\n", total_improvement / count
+            }
+          }'
+      
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-results
+          path: |
+            baseline.csv
+            optimized.csv
